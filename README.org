@@ -1,0 +1,8 @@
+* I will write a quick and dirty library to manipulate xrandr by shelling out.
+- connected displays: `xrandr | grep " connected " | awk '{ print$1 }'`
+- gamma and pixel brightness: `xrandr --output eDP-1 --brightness 1.0 --gamma 1.0:1.0:1.0`
+** Note: for now, gamma and brighness are not read at startup, they are just set to 1
+- because xrandr gamma is buggy and inverted for some weird reason. it's just easier this way especiall since this shelling solution is temporary
+- todo: have app save the state of all displays periodically on quit and restore on open
+** TODO: error checking
+- and result wrap everything
