@@ -4,5 +4,25 @@
 ** Note: for now, gamma and brighness are not read at startup, they are just set to 1
 - because xrandr gamma is buggy and inverted for some weird reason. it's just easier this way especiall since this shelling solution is temporary
 - todo: have app save the state of all displays periodically on quit and restore on open
-** TODO: error checking
-- and result wrap everything
+** TODO:
+- error checking and result wrap everything
+- MAYBE: hava a bool in disp for can_change_backlight for integrated displays and have a backlight slider as well
+  - not sure how I would do this because backlight brightness is cumbersome and may require more than xrandr
+  - maybe use info in `/sys/class/backlight/`. will require sudo which sucks
+
+* Main:
+- I don't like the way plop tui does this, but more investigation is necessary
+  - ACTUALLY: maybe this allows them to get state information from the actual running app. maybe keep
+- two threads: ui (main), io
+* TODOS:
+- what happens when you connect a new display while app running?
+  - hava a reload button 'r' to reload disp_mgr
+- error checking
+- naming consistency
+- make so pressing 0-9 jumps to that position along the selected gauge in the ui
+- config file
+- get rid of debug menu
+- help menu spawns when '?' hit
+- hava a menu with preset color temperatures
+- hava a sync 's' key for setting all monitors to settings in current view
+  - maybe have 's' toggle, so changes are reflected in all monitors as they are being made

@@ -1,12 +1,34 @@
 use std::process::Command;
 
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DispProp {
     Brightness,
     R,
     G,
     B,
-    None,
 }
+
+impl DispProp {
+    pub fn next(&mut self) {
+        *self = match self {
+            DispProp::Brightness => DispProp::R,
+            DispProp::R          => DispProp::G,
+            DispProp::G          => DispProp::B,
+            DispProp::B          => DispProp::Brightness,
+        };
+    }
+
+    pub fn prev(&mut self) {
+        *self = match self {
+            DispProp::Brightness => DispProp::B,
+            DispProp::R          => DispProp::Brightness,
+            DispProp::G          => DispProp::R,
+            DispProp::B          => DispProp::G,
+        };
+    }
+}
+//implement next and prev for this enum to use in ui
 
 #[derive(Debug, Clone, Copy)]
 pub struct Gamma {
@@ -30,7 +52,7 @@ impl Gamma {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Disp {
     pub name: String,
     pub brightness: u8,
@@ -50,15 +72,35 @@ impl Disp {
         ((self.brightness as f32) / 100.0).to_string()
     }
 
-    pub fn set_value(&mut self, prop: DispProp, val: u8) {
+    pub fn increment_value(&mut self, prop: DispProp) {
+        let val = match prop {
+            DispProp::Brightness => self.brightness + 1,
+            DispProp::R => self.gamma.r + 1,
+            DispProp::G => self.gamma.g + 1,
+            DispProp::B => self.gamma.b + 1,
+        };
+        self.set_value(prop, val);
+    }
+
+    pub fn decrement_value(&mut self, prop: DispProp) {
+        let val = match prop {
+            DispProp::Brightness => self.brightness - 1,
+            DispProp::R => self.gamma.r - 1,
+            DispProp::G => self.gamma.g - 1,
+            DispProp::B => self.gamma.b - 1,
+        };
+        self.set_value(prop, val);
+    }
+
+    pub fn set_value(&mut self, prop: DispProp, mut val: u8) {
         //TODO: error checking
+        val = val.clamp(1, 100);
         let mut new_disp = Disp::new(self.name.clone(), self.brightness, self.gamma);
         match prop {
             DispProp::R => new_disp.gamma.r = val,
             DispProp::G => new_disp.gamma.g = val,
             DispProp::B => new_disp.gamma.b = val,
             DispProp::Brightness => new_disp.brightness = val,
-            _ => {}
         };
 
         let _out = Command::new("/bin/xrandr")
@@ -72,6 +114,5 @@ impl Disp {
             .expect("failed to execute process");
 
         *self = new_disp;
-
     }
 }

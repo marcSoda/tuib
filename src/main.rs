@@ -1,12 +1,31 @@
-mod disp_mgr;
-use disp_mgr::{ DispMgr, disp::DispProp };
-use std::{thread, time::Duration};
+use std::sync::Arc;
+use eyre::Result;
+use log::LevelFilter;
+use tuib::app::App;
+use tuib::io::handler::IoAsyncHandler;
+use tuib::io::IoEvent;
+use tuib::start_ui;
 
+#[tokio::main]
+async fn main() -> Result<()> {
+    let (sync_io_tx, mut sync_io_rx) = tokio::sync::mpsc::channel::<IoEvent>(100);
 
-fn main() {
-    let mut disp_mgr = DispMgr::new();
-    disp_mgr.set_value("eDP-1".to_string(), DispProp::R, 100);
-    disp_mgr.set_value("eDP-1".to_string(), DispProp::G, 100);
-    disp_mgr.set_value("eDP-1".to_string(), DispProp::B, 100);
-    disp_mgr.set_value("eDP-1".to_string(), DispProp::Brightness, 100);
+    let app = Arc::new(tokio::sync::Mutex::new(App::new(sync_io_tx.clone()))); //for io thread
+    let app_ui = Arc::clone(&app);                                             //for ui(main) thread
+
+    tui_logger::init_logger(LevelFilter::Debug).unwrap();
+    tui_logger::set_default_level(log::LevelFilter::Debug);
+
+    // IO thread
+    tokio::spawn(async move {
+        let mut handler = IoAsyncHandler::new(app);
+        while let Some(io_event) = sync_io_rx.recv().await {
+            handler.handle_io_event(io_event).await;
+        }
+    });
+
+    //ui(main) thread
+    start_ui(&app_ui).await?;
+
+    Ok(())
 }
