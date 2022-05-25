@@ -4,6 +4,7 @@ use log::LevelFilter;
 use tuib::app::App;
 use tuib::io::handler::IoAsyncHandler;
 use tuib::io::IoEvent;
+use tuib::disp_mgr::DispMgr;
 use tuib::start_ui;
 
 #[tokio::main]
@@ -18,7 +19,7 @@ async fn main() -> Result<()> {
 
     // IO thread
     tokio::spawn(async move {
-        let mut handler = IoAsyncHandler::new(app);
+        let mut handler = IoAsyncHandler::new(app, DispMgr::new());
         while let Some(io_event) = sync_io_rx.recv().await {
             handler.handle_io_event(io_event).await;
         }

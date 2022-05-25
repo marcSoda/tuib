@@ -3,15 +3,19 @@ use eyre::Result;
 use log::{error, info};
 use super::IoEvent;
 use crate::app::App;
-use crate::disp_mgr::disp::DispProp;
+use crate::disp_mgr::{DispMgr, disp::DispProp};
 
 pub struct IoAsyncHandler {
     app: Arc<tokio::sync::Mutex<App>>,
+    disp_mgr: DispMgr,
 }
 
 impl IoAsyncHandler {
-    pub fn new(app: Arc<tokio::sync::Mutex<App>>) -> Self {
-        Self { app }
+    pub fn new(app: Arc<tokio::sync::Mutex<App>>, disp_mgr: DispMgr) -> Self {
+        Self {
+            app,
+            disp_mgr,
+        }
     }
 
     pub async fn handle_io_event(&mut self, io_event: IoEvent) {
@@ -38,20 +42,18 @@ impl IoAsyncHandler {
     }
 
     async fn do_increment(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
+        info!(">>>>>>>>>>>>>>>>>>>>>>>>>");
+        // if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
+        self.disp_mgr.increment_value_by_index(0, prop);
         let app = self.app.lock().await;
-        if let Some(num_disps) = app.state().num_disps() { //if debug menu is up, return
-            if device_index == *num_disps { return Ok(()); }
-        }
-        app.disp_mgr().lock().unwrap().increment_value_by_index(device_index, prop);
         Ok(())
     }
 
     async fn do_decrement(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
+        info!("<<<<<<<<<<<<<<<<<<<");
+        // if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
+        self.disp_mgr.decrement_value_by_index(0, prop);
         let app = self.app.lock().await;
-        if let Some(num_disps) = app.state().num_disps() { //if debug menu is up, return
-            if device_index == *num_disps { return Ok(()); }
-        }
-        app.disp_mgr().lock().unwrap().decrement_value_by_index(device_index, prop);
         Ok(())
     }
 }
