@@ -1,5 +1,5 @@
 use std::io::stdout;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use app::{App, AppReturn};
 use eyre::Result;
@@ -14,7 +14,7 @@ pub mod inputs;
 pub mod io;
 pub mod disp_mgr;
 
-pub async fn start_ui(app: &Arc<tokio::sync::Mutex<App>>) -> Result<()> {
+pub fn start_ui(app: &Arc<Mutex<App>>) -> Result<()> {
     let stdout = stdout();
     crossterm::terminal::enable_raw_mode()?;
     let backend = CrosstermBackend::new(stdout);
@@ -26,18 +26,18 @@ pub async fn start_ui(app: &Arc<tokio::sync::Mutex<App>>) -> Result<()> {
     let mut events = Events::new(tick_rate);
 
     {
-        let mut app = app.lock().await;
-        app.dispatch(IoEvent::Initialize).await;
+        let mut app = app.lock().unwrap();
+        app.dispatch(IoEvent::Initialize);
     }
 
     loop {
-        let mut app = app.lock().await;
+        let mut app = app.lock().unwrap();
 
         terminal.draw(|rect| ui::draw(rect, &app))?;
 
-        let result = match events.next().await {
-            InputEvent::Input(key) => app.do_action(key).await,
-            InputEvent::Tick => app.update_on_tick().await,
+        let result = match events.next() {
+            InputEvent::Input(key) => app.do_action(key),
+            InputEvent::Tick => app.update_on_tick(),
         };
 
         if result == AppReturn::Exit {

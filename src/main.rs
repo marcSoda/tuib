@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use eyre::Result;
 use log::LevelFilter;
 use tuib::app::App;
@@ -7,26 +7,25 @@ use tuib::io::IoEvent;
 use tuib::disp_mgr::DispMgr;
 use tuib::start_ui;
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    let (sync_io_tx, mut sync_io_rx) = tokio::sync::mpsc::channel::<IoEvent>(100);
+fn main() -> Result<()> {
+    let (sync_io_tx, sync_io_rx) = std::sync::mpsc::channel::<IoEvent>();
 
-    let app = Arc::new(tokio::sync::Mutex::new(App::new(sync_io_tx.clone()))); //for io thread
-    let app_ui = Arc::clone(&app);                                             //for ui(main) thread
+    let app = Arc::new(Mutex::new(App::new(sync_io_tx))); //for io thread
+    let app_ui = Arc::clone(&app);                                           //for ui(main) thread
 
     tui_logger::init_logger(LevelFilter::Debug).unwrap();
     tui_logger::set_default_level(log::LevelFilter::Debug);
 
     // IO thread
-    tokio::spawn(async move {
+    std::thread::spawn(move || {
         let mut handler = IoAsyncHandler::new(app, DispMgr::new());
-        while let Some(io_event) = sync_io_rx.recv().await {
-            handler.handle_io_event(io_event).await;
+        while let Ok(io_event) = sync_io_rx.recv() {
+            handler.handle_io_event(io_event);
         }
     });
 
     //ui(main) thread
-    start_ui(&app_ui).await?;
+    start_ui(&app_ui)?;
 
     Ok(())
 }

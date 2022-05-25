@@ -18,7 +18,7 @@ pub enum AppReturn {
 }
 
 pub struct App {
-    io_tx: tokio::sync::mpsc::Sender<IoEvent>,
+    io_tx: std::sync::mpsc::Sender<IoEvent>,
     actions: Actions,
     is_loading: bool,
     state: AppState,
@@ -26,7 +26,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(io_tx: tokio::sync::mpsc::Sender<IoEvent>) -> Self {
+    pub fn new(io_tx: std::sync::mpsc::Sender<IoEvent>) -> Self {
         let actions = vec![Action::Quit].into();
         let is_loading = false;
         let state = AppState::default();
@@ -41,7 +41,7 @@ impl App {
         }
     }
 
-    pub async fn do_action(&mut self, key: Key) -> AppReturn {
+    pub fn do_action(&mut self, key: Key) -> AppReturn {
         if let Some(action) = self.actions.find(key) {
             debug!("Run action [{:?}]", action);
             match action {
@@ -66,7 +66,7 @@ impl App {
                     self.state.move_right();
                     if let Some(device_index) = self.state.tab_index() {
                         if let Some(focused_prop) = self.state.focused_prop() {
-                            self.dispatch(IoEvent::DeviceIncrement(device_index, focused_prop)).await;
+                            self.dispatch(IoEvent::DeviceIncrement(device_index, focused_prop));
                         }
                     }
                     AppReturn::Continue
@@ -75,7 +75,7 @@ impl App {
                     self.state.move_left();
                     if let Some(device_index) = self.state.tab_index() {
                         if let Some(focused_prop) = self.state.focused_prop() {
-                            self.dispatch(IoEvent::DeviceDecrement(device_index, focused_prop)).await;
+                            self.dispatch(IoEvent::DeviceDecrement(device_index, focused_prop));
                         }
                     }
                     AppReturn::Continue
@@ -88,13 +88,13 @@ impl App {
     }
 
     // This doesn't do anything, included for good measure
-    pub async fn update_on_tick(&mut self) -> AppReturn {
+    pub fn update_on_tick(&mut self) -> AppReturn {
         AppReturn::Continue
     }
 
-    pub async fn dispatch(&mut self, action: IoEvent) {
+    pub fn dispatch(&mut self, action: IoEvent) {
         self.is_loading = true;
-        if let Err(e) = self.io_tx.send(action).await {
+        if let Err(e) = self.io_tx.send(action) {
             self.is_loading = false;
             error!("Error from dispatch {}", e);
         };
