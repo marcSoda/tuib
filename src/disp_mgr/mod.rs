@@ -38,8 +38,11 @@ impl DispMgr {
     }
 
     pub fn get_disp_by_name(&mut self, name: String) -> &mut Disp {
-        //TODO: error checking
         self.disps.iter_mut().find(|x| x.name == name).unwrap()
+    }
+
+    pub fn get_disp_by_index(&self, i: usize) -> Disp {
+        self.disps[i].clone()
     }
 
     pub fn get_name_list(&self) -> Vec<&str> {

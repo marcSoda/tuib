@@ -50,7 +50,7 @@ impl Events {
     }
 
     /// Attempts to read an event.
-    pub fn next(&mut self) -> InputEvent {
+    pub fn get_next(&mut self) -> InputEvent {
         self.rx.recv().unwrap_or(InputEvent::Tick)
     }
 

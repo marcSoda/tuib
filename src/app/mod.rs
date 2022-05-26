@@ -1,7 +1,5 @@
 use log::{debug, error, warn};
-use std::sync::{Arc, Mutex};
-use self::actions::Actions;
-use self::state::AppState;
+use self::{actions::Actions, state::AppState};
 use crate::app::actions::Action;
 use crate::inputs::key::Key;
 use crate::io::IoEvent;
@@ -21,8 +19,7 @@ pub struct App {
     io_tx: std::sync::mpsc::Sender<IoEvent>,
     actions: Actions,
     is_loading: bool,
-    state: AppState,
-    disp_mgr: Arc<Mutex<DispMgr>>,
+    pub state: AppState,
 }
 
 impl App {
@@ -30,14 +27,12 @@ impl App {
         let actions = vec![Action::Quit].into();
         let is_loading = false;
         let state = AppState::default();
-        let disp_mgr = Arc::new(Mutex::new(DispMgr::new()));
 
         Self {
             io_tx,
             actions,
             is_loading,
             state,
-            disp_mgr,
         }
     }
 
@@ -108,15 +103,11 @@ impl App {
         &self.state
     }
 
-    pub fn disp_mgr(&self) -> Arc<Mutex<DispMgr>> {
-        Arc::clone(&self.disp_mgr)
-    }
-
     pub fn is_loading(&self) -> bool {
         self.is_loading
     }
 
-    pub fn initialized(&mut self) {
+    pub fn initialized(&mut self, disp_mgr: DispMgr) {
         self.actions = vec![
             Action::Quit,
             Action::MoveRight,
@@ -127,7 +118,7 @@ impl App {
             Action::TabLeft,
         ]
         .into();
-        self.state = AppState::initialized(Arc::clone(&self.disp_mgr));
+        self.state = AppState::initialized(disp_mgr);
     }
 
     pub fn loaded(&mut self) {

@@ -4,7 +4,6 @@ use log::LevelFilter;
 use tuib::app::App;
 use tuib::io::handler::IoAsyncHandler;
 use tuib::io::IoEvent;
-use tuib::disp_mgr::DispMgr;
 use tuib::start_ui;
 
 fn main() -> Result<()> {
@@ -18,7 +17,7 @@ fn main() -> Result<()> {
 
     // IO thread
     std::thread::spawn(move || {
-        let mut handler = IoAsyncHandler::new(app, DispMgr::new());
+        let mut handler = IoAsyncHandler::new(app);
         while let Ok(io_event) = sync_io_rx.recv() {
             handler.handle_io_event(io_event);
         }

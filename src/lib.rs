@@ -31,11 +31,12 @@ pub fn start_ui(app: &Arc<Mutex<App>>) -> Result<()> {
     }
 
     loop {
+        std::thread::sleep(std::time::Duration::from_millis(1));
         let mut app = app.lock().unwrap();
 
         terminal.draw(|rect| ui::draw(rect, &app))?;
 
-        let result = match events.next() {
+        let result = match events.get_next() {
             InputEvent::Input(key) => app.do_action(key),
             InputEvent::Tick => app.update_on_tick(),
         };

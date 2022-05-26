@@ -28,17 +28,12 @@ where
         )
         .split(size);
 
-    if let Some(tab_index) = app.state().tab_index() {
-        rect.render_widget(draw_tabs(&tab_index, app.disp_mgr().lock().unwrap().get_name_list()), chunks[0]);
-    }
-
-    if let Some(tab_index) = app.state().tab_index() {
-        if let Some(num_disps) = app.state().num_disps() {
-            if tab_index == *num_disps {
-                draw_menu_debug(rect, app, chunks);
-            } else {
-                draw_menu_controller(rect, app, chunks, &tab_index);
-            }
+    if let (Some(dm), Some(tab_index)) = (app.state().disp_mgr(), app.state().tab_index()) {
+        rect.render_widget(draw_tabs(&tab_index, dm.get_name_list()), chunks[0]);
+        if tab_index == dm.get_num_disps() {
+            draw_menu_debug(rect, app, chunks);
+        } else {
+            draw_menu_controller(rect, app, chunks, &tab_index);
         }
     }
 }
@@ -101,13 +96,14 @@ where
         )
         .split(chunks[1]);
 
-    let disp = &app.disp_mgr().lock().unwrap().disps[*tab_index].clone();
-    let brightness = (disp.brightness as f64) / 100.0;
-    let r = (disp.gamma.r as f64) / 100.0;
-    let g = (disp.gamma.g as f64) / 100.0;
-    let b = (disp.gamma.b as f64) / 100.0;
+    if let (Some(dm), Some(focused_prop)) = (app.state().disp_mgr(), app.state().focused_prop()) {
+        // let disp = &app.state().disp_mgr().disps[*tab_index].clone();
+        let disp = dm.get_disp_by_index(*tab_index);
+        let brightness = (disp.brightness as f64) / 100.0;
+        let r = (disp.gamma.r as f64) / 100.0;
+        let g = (disp.gamma.g as f64) / 100.0;
+        let b = (disp.gamma.b as f64) / 100.0;
 
-    if let Some(focused_prop) = app.state().focused_prop() {
         let gauge = draw_gauge("Brightness".to_string(), brightness, Color::DarkGray, focused_prop, DispProp::Brightness);
         rect.render_widget(gauge, body_chunks[0]);
         let gauge = draw_gauge("Red".to_string(), r, Color::Red, focused_prop, DispProp::R);

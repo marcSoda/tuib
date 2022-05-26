@@ -3,7 +3,7 @@ use eyre::Result;
 use log::{error, info};
 use super::IoEvent;
 use crate::app::App;
-use crate::disp_mgr::{DispMgr, disp::DispProp};
+use crate::disp_mgr::{disp::DispProp, DispMgr};
 
 pub struct IoAsyncHandler {
     app: Arc<Mutex<App>>,
@@ -11,7 +11,8 @@ pub struct IoAsyncHandler {
 }
 
 impl IoAsyncHandler {
-    pub fn new(app: Arc<Mutex<App>>, disp_mgr: DispMgr) -> Self {
+    pub fn new(app: Arc<Mutex<App>>) -> Self {
+        let disp_mgr = DispMgr::new();
         Self {
             app,
             disp_mgr,
@@ -36,24 +37,22 @@ impl IoAsyncHandler {
     fn do_initialize(&mut self) -> Result<()> {
         info!("Initialized");
         let mut app = self.app.lock().unwrap();
-        app.initialized();
+        app.initialized(self.disp_mgr.clone());
         info!("Application initialized");
         Ok(())
     }
 
     fn do_increment(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
-        info!(">>>>>>>>>>>>>>>>>>>>>>>>>");
-        // if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
-        self.disp_mgr.increment_value_by_index(0, prop);
-        let app = self.app.lock().unwrap();
+        if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
+        self.disp_mgr.increment_value_by_index(device_index, prop);
+        self.app.lock().unwrap().state.set_disp_mgr(self.disp_mgr.clone());
         Ok(())
     }
 
     fn do_decrement(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
-        info!("<<<<<<<<<<<<<<<<<<<");
-        // if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
-        self.disp_mgr.decrement_value_by_index(0, prop);
-        let app = self.app.lock().unwrap();
+        if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
+        self.disp_mgr.decrement_value_by_index(device_index, prop);
+        self.app.lock().unwrap().state.set_disp_mgr(self.disp_mgr.clone());
         Ok(())
     }
 }
