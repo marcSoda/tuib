@@ -1,19 +1,18 @@
-* I will write a quick and dirty library to manipulate xrandr by shelling out.
+* xrandr info: I will write a quick and dirty library to manipulate xrandr by shelling out.
 - connected displays: `xrandr | grep " connected " | awk '{ print$1 }'`
 - gamma and pixel brightness: `xrandr --output eDP-1 --brightness 1.0 --gamma 1.0:1.0:1.0`
 ** Note: for now, gamma and brighness are not read at startup, they are just set to 1
 - because xrandr gamma is buggy and inverted for some weird reason. it's just easier this way especiall since this shelling solution is temporary
-- todo: have app save the state of all displays periodically on quit and restore on open
 ** TODO:
 - error checking and result wrap everything
 - MAYBE: hava a bool in disp for can_change_backlight for integrated displays and have a backlight slider as well
   - not sure how I would do this because backlight brightness is cumbersome and may require more than xrandr
   - maybe use info in `/sys/class/backlight/`. will require sudo which sucks
 
-* Main:
-- I don't like the way plop tui does this, but more investigation is necessary
-  - ACTUALLY: maybe this allows them to get state information from the actual running app. maybe keep
-- two threads: ui (main), io
+* Notes:
+- there are two places where disp_mgr is stored. once in io, once in app::state. these do NOT share the same memory. the one in io is manipulated, then copied to the one in app::state. The one in app::state is NEVER directly used. Its state is just read by the UI and updated by IO when it gets a lock
+- there was a major issue in which the app was not able to be initialized due to a deadlock. it was difficult to debug, because everything was being used properly. the issue was that the lock in the loop of lib::start_ui unlocked and relocked faster than the IO thread could get a hold of it. apparenty mutexes in rust are "unfair". I solved this by waiting for 1ms before acquiring the lock in the loop of start_ui
+
 * TODOS:
 - what happens when you connect a new display while app running?
   - hava a reload button 'r' to reload disp_mgr
@@ -26,3 +25,7 @@
 - hava a menu with preset color temperatures
 - hava a sync 's' key for setting all monitors to settings in current view
   - maybe have 's' toggle, so changes are reflected in all monitors as they are being made
+- make disp_mgr good
+** Technical:
+- in io::handler::increment/decrement, instead of overwriting the entire disp_mgr, just overwrite the one property that was changed
+- look into parking_lot mutex which is "fair".

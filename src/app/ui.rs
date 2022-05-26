@@ -6,11 +6,11 @@ use tui::text::{Span, Spans};
 use tui::widgets::{Block, BorderType, Borders, Cell, LineGauge, Row, Table, Tabs};
 use tui::{symbols, Frame};
 use tui_logger::TuiLoggerWidget;
-
 use super::actions::Actions;
 use crate::app::App;
 use crate::disp_mgr::disp::DispProp;
 
+///Main draw function.
 pub fn draw<B>(rect: &mut Frame<B>, app: &App)
 where
     B: Backend,
@@ -38,6 +38,7 @@ where
     }
 }
 
+///Draw "tabs" at top of screen
 fn draw_tabs<'a>(index: &usize, mut names: Vec<&'a str>) -> Tabs<'a> {
     names.push("Debug");
     let titles = names
@@ -58,6 +59,7 @@ fn draw_tabs<'a>(index: &usize, mut names: Vec<&'a str>) -> Tabs<'a> {
             .fg(Color::Blue))
 }
 
+///Draw the debug menu
 pub fn draw_menu_debug<B>(rect: &mut Frame<B>, app: &App, chunks: Vec<Rect>)
 where
     B: Backend,
@@ -79,6 +81,7 @@ where
     rect.render_widget(help, body_chunks[1]);
 }
 
+///Draw the controller menu. Displays different stats depending which display is connected
 pub fn draw_menu_controller<B>(rect: &mut Frame<B>, app: &App, chunks: Vec<Rect>, tab_index: &usize)
 where
     B: Backend,
@@ -115,6 +118,7 @@ where
     }
 }
 
+///Draw a gauge meant to display brightness, r, g, or b status of a display. Drawn differently if selected.
 fn draw_gauge(mut title: String, mut ratio: f64, color: Color, focused_prop: DispProp, gauge_prop: DispProp) -> LineGauge<'static> {
     ratio = ratio.clamp(0.0, 1.0);
     if focused_prop == gauge_prop {
@@ -135,15 +139,7 @@ fn draw_gauge(mut title: String, mut ratio: f64, color: Color, focused_prop: Dis
     }
 }
 
-fn check_size(rect: &Rect) {
-    if rect.width < 52 {
-        panic!("Require width >= 52, (got {})", rect.width);
-    }
-    if rect.height < 28 {
-        panic!("Require height >= 28, (got {})", rect.height);
-    }
-}
-
+//Draw menu that shows keybindings
 fn draw_help(actions: &Actions) -> Table {
     let key_style = Style::default().fg(Color::LightCyan);
     let help_style = Style::default().fg(Color::Gray);
@@ -177,6 +173,7 @@ fn draw_help(actions: &Actions) -> Table {
         .column_spacing(1)
 }
 
+///Draw tuiloggerwidget
 fn draw_logs<'a>() -> TuiLoggerWidget<'a> {
     TuiLoggerWidget::default()
         .style_error(Style::default().fg(Color::Red))
@@ -191,4 +188,14 @@ fn draw_logs<'a>() -> TuiLoggerWidget<'a> {
                 .borders(Borders::ALL),
         )
         .style(Style::default().fg(Color::White).bg(Color::Black))
+}
+
+///Ensure window size is valid
+fn check_size(rect: &Rect) {
+    if rect.width < 52 {
+        panic!("Require width >= 52, (got {})", rect.width);
+    }
+    if rect.height < 28 {
+        panic!("Require height >= 28, (got {})", rect.height);
+    }
 }

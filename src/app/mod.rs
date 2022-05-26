@@ -23,6 +23,7 @@ pub struct App {
 }
 
 impl App {
+    ///Create new App. Needs io_tx for dispatching commands to IO thread
     pub fn new(io_tx: std::sync::mpsc::Sender<IoEvent>) -> Self {
         let actions = vec![Action::Quit].into();
         let is_loading = false;
@@ -36,6 +37,7 @@ impl App {
         }
     }
 
+    ///Does something in the UI. Depending on action, dispatch IO event to IO thread
     pub fn do_action(&mut self, key: Key) -> AppReturn {
         if let Some(action) = self.actions.find(key) {
             debug!("Run action [{:?}]", action);
@@ -82,11 +84,12 @@ impl App {
         }
     }
 
-    // This doesn't do anything, included for good measure
+    ///Runs each tick
     pub fn update_on_tick(&mut self) -> AppReturn {
         AppReturn::Continue
     }
 
+    ///Send an IoEvent for the IO thread to complete
     pub fn dispatch(&mut self, action: IoEvent) {
         self.is_loading = true;
         if let Err(e) = self.io_tx.send(action) {
@@ -95,18 +98,22 @@ impl App {
         };
     }
 
+    ///Return list of possible actions
     pub fn actions(&self) -> &Actions {
         &self.actions
     }
 
+    ///Return application state
     pub fn state(&self) -> &AppState {
         &self.state
     }
 
+    ///Return status of app
     pub fn is_loading(&self) -> bool {
         self.is_loading
     }
 
+    ///Initialize application
     pub fn initialize(&mut self, disp_mgr: DispMgr) {
         self.actions = vec![
             Action::Quit,
@@ -121,6 +128,7 @@ impl App {
         self.state = AppState::initialize(disp_mgr);
     }
 
+    ///Call when done loading
     pub fn loaded(&mut self) {
         self.is_loading = false;
     }

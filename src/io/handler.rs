@@ -5,12 +5,12 @@ use super::IoEvent;
 use crate::app::App;
 use crate::disp_mgr::{disp::DispProp, DispMgr};
 
-pub struct IoAsyncHandler {
+pub struct IoHandler {
     app: Arc<Mutex<App>>,
     disp_mgr: DispMgr,
 }
 
-impl IoAsyncHandler {
+impl IoHandler {
     pub fn new(app: Arc<Mutex<App>>) -> Self {
         let disp_mgr = DispMgr::new();
         Self {
@@ -19,6 +19,7 @@ impl IoAsyncHandler {
         }
     }
 
+    ///Call different function depending on IoEvent
     pub fn handle_io_event(&mut self, io_event: IoEvent) {
         let result = match io_event {
             IoEvent::Initialize => self.do_initialize(),
@@ -34,6 +35,7 @@ impl IoAsyncHandler {
         app.loaded();
     }
 
+    ///Initialize the application
     fn do_initialize(&mut self) -> Result<()> {
         info!("Initialized");
         let mut app = self.app.lock().unwrap();
@@ -42,6 +44,7 @@ impl IoAsyncHandler {
         Ok(())
     }
 
+    ///Increment a single DispProp for a single device, and reflect changes in the UI
     fn do_increment(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
         if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
         self.disp_mgr.increment_value_by_index(device_index, prop);
@@ -49,6 +52,7 @@ impl IoAsyncHandler {
         Ok(())
     }
 
+    ///Decrement a single DispProp for a single device, and reflect changes in the UI
     fn do_decrement(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
         if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
         self.disp_mgr.decrement_value_by_index(device_index, prop);
