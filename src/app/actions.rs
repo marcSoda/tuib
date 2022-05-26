@@ -31,12 +31,12 @@ impl Action {
     pub fn keys(&self) -> &[Key] {
         match self {
             Action::Quit => &[Key::Char('q')],
-            Action::MoveRight => &[Key::Char('l')],
-            Action::MoveLeft => &[Key::Char('h')],
-            Action::MoveUp => &[Key::Char('k')],
-            Action::MoveDown => &[Key::Char('j')],
-            Action::TabRight => &[Key::Char('L')],
-            Action::TabLeft => &[Key::Char('H')],
+            Action::MoveRight => &[Key::Char('l'), Key::Right],
+            Action::MoveLeft => &[Key::Char('h'), Key::Left],
+            Action::MoveUp => &[Key::Char('k'), Key::Up],
+            Action::MoveDown => &[Key::Char('j'), Key::Down],
+            Action::TabRight => &[Key::Char('L'), Key::Char('.'), Key::Char('>')],
+            Action::TabLeft => &[Key::Char('H'), Key::Char(','), Key::Char('<')],
         }
     }
 }

@@ -37,7 +37,7 @@ impl IoAsyncHandler {
     fn do_initialize(&mut self) -> Result<()> {
         info!("Initialized");
         let mut app = self.app.lock().unwrap();
-        app.initialized(self.disp_mgr.clone());
+        app.initialize(self.disp_mgr.clone());
         info!("Application initialized");
         Ok(())
     }

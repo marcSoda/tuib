@@ -107,7 +107,7 @@ impl App {
         self.is_loading
     }
 
-    pub fn initialized(&mut self, disp_mgr: DispMgr) {
+    pub fn initialize(&mut self, disp_mgr: DispMgr) {
         self.actions = vec![
             Action::Quit,
             Action::MoveRight,
@@ -118,7 +118,7 @@ impl App {
             Action::TabLeft,
         ]
         .into();
-        self.state = AppState::initialized(disp_mgr);
+        self.state = AppState::initialize(disp_mgr);
     }
 
     pub fn loaded(&mut self) {
