@@ -2,6 +2,11 @@
 name = "tuib"
 version = "0.1.0"
 edition = "2021"
+authors = ["Marc Soda Jr <m@soda.fm>"]
+description = "TUI Brightness Controller for Multiple Monitors"
+homepage = "linkedin.com/in/marc-soda"
+repository = "github.com/marcSoda/tuib"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
