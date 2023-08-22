@@ -1,4 +1,5 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use parking_lot::FairMutex;
 use eyre::Result;
 use log::LevelFilter;
 use tuib::app::App;
@@ -11,7 +12,7 @@ fn main() -> Result<()> {
     let (sync_io_tx, sync_io_rx) = std::sync::mpsc::channel::<IoEvent>();
 
     //create and clone uninitialzed app
-    let app = Arc::new(Mutex::new(App::new(sync_io_tx))); //for io thread
+    let app = Arc::new(FairMutex::new(App::new(sync_io_tx))); //for io thread
     let app_ui = Arc::clone(&app);                        //for ui(main) thread
 
     //init tui_logger. may remove later

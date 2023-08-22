@@ -1,5 +1,6 @@
 use std::io::stdout;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use parking_lot::FairMutex;
 use std::time::Duration;
 use app::{App, AppReturn};
 use eyre::Result;
@@ -14,7 +15,7 @@ pub mod inputs;
 pub mod io;
 pub mod disp_mgr;
 
-pub fn start_ui(app: &Arc<Mutex<App>>) -> Result<()> {
+pub fn start_ui(app: &Arc<FairMutex<App>>) -> Result<()> {
     //setup tui
     let stdout = stdout();
     crossterm::terminal::enable_raw_mode()?;
@@ -23,19 +24,16 @@ pub fn start_ui(app: &Arc<Mutex<App>>) -> Result<()> {
     terminal.clear()?;
     terminal.hide_cursor()?;
 
-    let tick_rate = Duration::from_millis(200);
+    // todo: when tick rate is raised (eg 200), weird stuff happens when holding keys. test it
+    let tick_rate = Duration::from_millis(10);
     let mut events = Events::new(tick_rate);
 
-    {   //initialize the app
-        let mut app = app.lock().unwrap();
-        app.dispatch(IoEvent::Initialize);
-    }
+    app.lock().dispatch(IoEvent::Initialize);
 
     //main UI loop
     loop {
         //need to sleep or lock is acquired too fast and IO thread blocks infinitely
-        std::thread::sleep(std::time::Duration::from_millis(1));
-        let mut app = app.lock().unwrap();
+        let mut app = app.lock();
 
         //draw the app
         terminal.draw(|rect| ui::draw(rect, &app))?;

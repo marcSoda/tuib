@@ -1,4 +1,5 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use parking_lot::FairMutex;
 use eyre::Result;
 use log::{error, info};
 use super::IoEvent;
@@ -6,12 +7,12 @@ use crate::app::App;
 use crate::disp_mgr::{disp::DispProp, DispMgr};
 
 pub struct IoHandler {
-    app: Arc<Mutex<App>>,
+    app: Arc<FairMutex<App>>,
     disp_mgr: DispMgr,
 }
 
 impl IoHandler {
-    pub fn new(app: Arc<Mutex<App>>) -> Self {
+    pub fn new(app: Arc<FairMutex<App>>) -> Self {
         let disp_mgr = DispMgr::new();
         Self {
             app,
@@ -31,14 +32,14 @@ impl IoHandler {
             error!("Error in io::handler::handle_io_event: {:?}", err);
         }
 
-        let mut app = self.app.lock().unwrap();
+        let mut app = self.app.lock();
         app.loaded();
     }
 
     ///Initialize the application
     fn do_initialize(&mut self) -> Result<()> {
         info!("Initialized");
-        let mut app = self.app.lock().unwrap();
+        let mut app = self.app.lock();
         app.initialize(self.disp_mgr.clone());
         info!("Application initialized");
         Ok(())
@@ -48,7 +49,7 @@ impl IoHandler {
     fn do_increment(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
         if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
         self.disp_mgr.increment_value_by_index(device_index, prop);
-        self.app.lock().unwrap().state.set_disp_mgr(self.disp_mgr.clone());
+        self.app.lock().state.set_disp_mgr(self.disp_mgr.clone());
         Ok(())
     }
 
@@ -56,7 +57,7 @@ impl IoHandler {
     fn do_decrement(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
         if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
         self.disp_mgr.decrement_value_by_index(device_index, prop);
-        self.app.lock().unwrap().state.set_disp_mgr(self.disp_mgr.clone());
+        self.app.lock().state.set_disp_mgr(self.disp_mgr.clone());
         Ok(())
     }
 }
