@@ -12,11 +12,12 @@ pub enum Action {
     MoveDown,
     TabRight,
     TabLeft,
+    Scale(u8),
 }
 
 impl Action {
     pub fn iterator() -> Iter<'static, Action> {
-        static ACTIONS: [Action; 7] = [
+        static ACTIONS: [Action; 17] = [
             Action::Quit,
             Action::MoveRight,
             Action::MoveLeft,
@@ -24,35 +25,46 @@ impl Action {
             Action::MoveDown,
             Action::TabRight,
             Action::TabLeft,
+            Action::Scale(1),
+            Action::Scale(2),
+            Action::Scale(3),
+            Action::Scale(4),
+            Action::Scale(5),
+            Action::Scale(6),
+            Action::Scale(7),
+            Action::Scale(8),
+            Action::Scale(9),
+            Action::Scale(0),
         ];
         ACTIONS.iter()
     }
 
-    pub fn keys(&self) -> &[Key] {
+    pub fn keys(&self) -> Vec<Key> {
         match self {
-            Action::Quit => &[Key::Char('q')],
-            Action::MoveRight => &[Key::Char('l'), Key::Right],
-            Action::MoveLeft => &[Key::Char('h'), Key::Left],
-            Action::MoveUp => &[Key::Char('k'), Key::Up],
-            Action::MoveDown => &[Key::Char('j'), Key::Down],
-            Action::TabRight => &[Key::Char('L'), Key::Char('.'), Key::Char('>')],
-            Action::TabLeft => &[Key::Char('H'), Key::Char(','), Key::Char('<')],
+            Action::Quit => vec![Key::Char('q')],
+            Action::MoveRight => vec![Key::Char('l'), Key::Right],
+            Action::MoveLeft => vec![Key::Char('h'), Key::Left],
+            Action::MoveUp => vec![Key::Char('k'), Key::Up],
+            Action::MoveDown => vec![Key::Char('j'), Key::Down],
+            Action::TabRight => vec![Key::Char('L'), Key::Char('.'), Key::Char('>')],
+            Action::TabLeft => vec![Key::Char('H'), Key::Char(','), Key::Char('<')],
+            Action::Scale(n) => vec![Key::Char(('0' as u8 + n) as char)],
         }
     }
 }
 
 impl Display for Action {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let str = match self {
-            Action::Quit => "Quit",
-            Action::MoveRight => "MoveRight",
-            Action::MoveLeft => "MoveLeft",
-            Action::MoveUp => "MoveUp",
-            Action::MoveDown => "MoveDown",
-            Action::TabRight => "TabRight",
-            Action::TabLeft => "TabLeft",
-        };
-        write!(f, "{}", str)
+        match self {
+            Action::Quit => write!(f, "Quit"),
+            Action::MoveRight => write!(f, "MoveRight"),
+            Action::MoveLeft => write!(f, "MoveLeft"),
+            Action::MoveUp => write!(f, "MoveUp"),
+            Action::MoveDown => write!(f, "MoveDown"),
+            Action::TabRight => write!(f, "TabRight"),
+            Action::TabLeft => write!(f, "TabLeft"),
+            Action::Scale(n) => write!(f, "Scale{}", n),
+        }
     }
 }
 

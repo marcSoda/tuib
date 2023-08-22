@@ -69,6 +69,14 @@ impl DispMgr {
         self.disps[index].decrement_value(prop);
     }
 
+    pub fn scale_value_by_index(&mut self, index: usize, prop: DispProp, scale: u8) {
+        if scale > 0 && scale <= 10 {
+            self.disps[index].set_value(prop, scale*10);
+        } else {
+            self.disps[index].set_value(prop, 100);
+        }
+    }
+
     pub fn reload(&mut self) {
         *self = DispMgr::new();
     }

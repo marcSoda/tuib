@@ -77,6 +77,15 @@ impl App {
                     }
                     AppReturn::Continue
                 }
+                Action::Scale(s) => {
+                    self.state.scale(*s);
+                    if let Some(device_index) = self.state.tab_index() {
+                        if let Some(focused_prop) = self.state.focused_prop() {
+                            self.dispatch(IoEvent::DeviceScale(device_index, focused_prop, *s));
+                        }
+                    }
+                    AppReturn::Continue
+                }
             }
         } else {
             warn!("No action accociated to {}", key);
@@ -123,6 +132,16 @@ impl App {
             Action::MoveDown,
             Action::TabRight,
             Action::TabLeft,
+            Action::Scale(1),
+            Action::Scale(2),
+            Action::Scale(3),
+            Action::Scale(4),
+            Action::Scale(5),
+            Action::Scale(6),
+            Action::Scale(7),
+            Action::Scale(8),
+            Action::Scale(9),
+            Action::Scale(0),
         ]
         .into();
         self.state = AppState::initialize(disp_mgr);

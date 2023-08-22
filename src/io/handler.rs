@@ -26,6 +26,7 @@ impl IoHandler {
             IoEvent::Initialize => self.do_initialize(),
             IoEvent::DeviceIncrement(device_index, prop) => self.do_increment(device_index, prop),
             IoEvent::DeviceDecrement(device_index, prop) => self.do_decrement(device_index, prop),
+            IoEvent::DeviceScale(device_index, prop, scale) => self.do_scale(device_index, prop, scale),
         };
 
         if let Err(err) = result {
@@ -57,6 +58,14 @@ impl IoHandler {
     fn do_decrement(&mut self, device_index: usize, prop: DispProp) -> Result<()> {
         if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
         self.disp_mgr.decrement_value_by_index(device_index, prop);
+        self.app.lock().state.set_disp_mgr(self.disp_mgr.clone());
+        Ok(())
+    }
+
+    ///Scale a single DispProp for a single device and reflect changes in the UI
+    fn do_scale(&mut self, device_index: usize, prop: DispProp, scale: u8) -> Result<()> {
+        if device_index == self.disp_mgr.get_num_disps() { return Ok(()); }
+        self.disp_mgr.scale_value_by_index(device_index, prop, scale);
         self.app.lock().state.set_disp_mgr(self.disp_mgr.clone());
         Ok(())
     }

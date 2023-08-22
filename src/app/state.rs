@@ -38,6 +38,10 @@ impl AppState {
         info!("Waiting for io thread to move left");
     }
 
+    pub fn scale(&mut self, scale: u8) {
+        info!("Waiting for io thread to scale {}", scale);
+    }
+
     ///Increment tab_index or cycle around if 1
     pub fn tab_right(&mut self) {
         if let Self::Initialized { tab_index, num_disps, .. } = self {

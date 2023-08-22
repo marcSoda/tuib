@@ -6,4 +6,5 @@ pub enum IoEvent {
     Initialize,
     DeviceIncrement(usize, DispProp),
     DeviceDecrement(usize, DispProp),
+    DeviceScale(usize, DispProp, u8),
 }
