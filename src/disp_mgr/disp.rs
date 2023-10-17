@@ -50,6 +50,23 @@ impl Gamma {
         };
         fr + ":" + &fg + ":" + &fb
     }
+
+    // TODO: this will take a gamma string from xrandr and parse it as relative percentages.
+    // it won't be exact, but it will be close enough
+    // this is for when you update tuib to read the gamma values from xrandr instead of assuming they're all 100%
+    // example gamma string: 1.3:1.7:2.5
+    // this was taken when r was 80%, green was 60%, and blue was 40%
+    // if you input '1.3:1.7:2.5' into this function, it will report 76 58 40, which is not exactly right, but close enough
+    pub fn from_gamma_string(&mut self, gamma_str: &str) {
+        let values: Vec<&str> = gamma_str.split(':').collect();
+        if values.len() != 3 {
+            println!("Invalid gamma string format");
+        }
+
+        self.r = (100.0 / values[0].parse::<f32>().unwrap_or(1.0)) as u8;
+        self.g = (100.0 / values[1].parse::<f32>().unwrap_or(1.0)) as u8;
+        self.b = (100.0 / values[2].parse::<f32>().unwrap_or(1.0)) as u8;
+    }
 }
 
 #[derive(Debug, Clone)]
